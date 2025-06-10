@@ -1,10 +1,14 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Blueprint',
-  description: 'AI-powered design tool',
+  title: {
+    default: 'Blueprint - AI Design Tool',
+    template: '%s | Blueprint',
+  },
+  description: 'Create stunning designs with AI. Your personal design assistant.',
 };
 
 export default function RootLayout({

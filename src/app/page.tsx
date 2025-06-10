@@ -1,57 +1,49 @@
-'use client';
 
-import { useState } from 'react';
-import { AppHeader } from '@/components/shared/AppHeader';
-import { LeftPanel } from '@/components/layout/LeftPanel';
-import { CenterPanel } from '@/components/layout/CenterPanel';
-import { RightPanel } from '@/components/layout/RightPanel';
-import type { DesignLayout, DesignElement } from '@/types/blueprint';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Zap, Edit3 } from 'lucide-react';
+import type { Metadata } from 'next';
 
-export default function BlueprintPage() {
-  const [currentDesign, setCurrentDesign] = useState<DesignLayout | null>(null);
-  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+export const metadata: Metadata = {
+  title: 'Blueprint - AI-Powered Design',
+  description: 'Welcome to Blueprint, your AI-powered design assistant. Create stunning graphics with ease.',
+};
 
-  const handleLayoutSelect = (layout: DesignLayout) => {
-    setCurrentDesign(layout);
-    setSelectedElementId(null); // Deselect any element when a new layout is chosen
-  };
-
-  const handleSelectElement = (elementId: string | null) => {
-    setSelectedElementId(elementId);
-  };
-  
-  const getSelectedElement = (): DesignElement | null => {
-    if (!currentDesign || !selectedElementId) return null;
-    return currentDesign.elements.find(el => el.id === selectedElementId) || null;
-  };
-
-  const handleUpdateElement = (updatedElement: DesignElement) => {
-    setCurrentDesign(prevDesign => {
-      if (!prevDesign) return null;
-      return {
-        ...prevDesign,
-        elements: prevDesign.elements.map(el =>
-          el.id === updatedElement.id ? updatedElement : el
-        ),
-      };
-    });
-  };
-
+export default function LandingPage() {
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-hidden">
-      <AppHeader />
-      <div className="flex flex-1 min-h-0"> {/* min-h-0 is crucial for flex children to scroll correctly */}
-        <LeftPanel onLayoutSelect={handleLayoutSelect} />
-        <CenterPanel 
-          currentDesign={currentDesign} 
-          selectedElementId={selectedElementId}
-          onSelectElement={handleSelectElement} 
-        />
-        <RightPanel 
-          selectedElement={getSelectedElement()}
-          onUpdateElement={handleUpdateElement}
-        />
-      </div>
+    <div className="flex flex-col min-h-screen bg-background">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <Zap className="h-7 w-7 text-primary" />
+            <h1 className="text-2xl font-bold font-headline text-primary">Blueprint</h1>
+          </Link>
+          <Button asChild>
+            <Link href="/blueprint">
+              Open Editor
+              <Edit3 className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </header>
+      <main className="flex-1 flex flex-col items-center justify-center text-center p-8">
+        <Zap className="w-24 h-24 text-primary mb-6" />
+        <h1 className="text-5xl font-bold font-headline mb-4">
+          Design at the Speed of Thought
+        </h1>
+        <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
+          Blueprint is an intuitive, AI-powered design tool that helps you create beautiful graphics, marketing materials, and more in minutes.
+        </p>
+        <Button size="lg" asChild>
+          <Link href="/blueprint">
+            Get Started with Blueprint
+            <Edit3 className="ml-2 h-5 w-5" />
+          </Link>
+        </Button>
+      </main>
+      <footer className="py-6 text-center text-muted-foreground text-sm border-t">
+        <p>&copy; {new Date().getFullYear()} Blueprint. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
