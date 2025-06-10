@@ -7,6 +7,7 @@ import { LeftPanel } from '@/components/layout/LeftPanel';
 import { CenterPanel } from '@/components/layout/CenterPanel';
 import { RightPanel } from '@/components/layout/RightPanel';
 import type { DesignLayout, DesignElement } from '@/types/blueprint';
+import { addIdsToElements } from '@/components/canvas/Canvas';
 
 export default function BlueprintEditorPage() {
   const [currentDesign, setCurrentDesign] = useState<DesignLayout | null>(null);
@@ -38,6 +39,26 @@ export default function BlueprintEditorPage() {
     });
   };
 
+  const handleAddElement = (newElementSchema: Omit<DesignElement, 'id'>) => {
+    const [newElementWithId] = addIdsToElements([newElementSchema]);
+    setCurrentDesign(prevDesign => {
+      if (!prevDesign) {
+        // If there's no current design, create one with this new element
+        return {
+          id: crypto.randomUUID(),
+          description: 'New Design with Element',
+          elements: [newElementWithId],
+          canvasBackgroundColor: 'hsl(var(--card))',
+        };
+      }
+      // Add to existing design
+      return {
+        ...prevDesign,
+        elements: [...prevDesign.elements, newElementWithId],
+      };
+    });
+  };
+
   const handleUpdateCanvasBackgroundColor = (color: string) => {
     setCurrentDesign(prevDesign => {
       if (!prevDesign) return { id: crypto.randomUUID(), description: 'New Design', elements: [], canvasBackgroundColor: color };
@@ -50,9 +71,9 @@ export default function BlueprintEditorPage() {
 
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-hidden">
-      <AppHeader />
+      <AppHeader currentDesign={currentDesign} />
       <div className="flex flex-1 min-h-0">
-        <LeftPanel onLayoutSelect={handleLayoutSelect} />
+        <LeftPanel onLayoutSelect={handleLayoutSelect} onAddElement={handleAddElement} />
         <CenterPanel 
           currentDesign={currentDesign} 
           selectedElementId={selectedElementId}

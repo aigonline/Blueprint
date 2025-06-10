@@ -1,3 +1,4 @@
+
 export interface DesignElement {
   id: string; // Added for client-side management
   type: 'text' | 'image' | 'shape' | string; // Allow string for future AI-generated types
@@ -20,6 +21,8 @@ export interface DesignElement {
     lineHeight?: string | number;
     textAlign?: React.CSSProperties['textAlign'];
     textShadow?: string; // e.g., "2px 2px 5px red"
+    borderRadius?: string; // Added for ShapeEditor
+    opacity?: number; // Added for ShapeEditor
     // Allow any other AI-provided or future style properties
     [key: string]: any;
   };

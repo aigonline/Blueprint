@@ -25,24 +25,26 @@ export function CanvasElement({ element, scale, isSelected, onClick }: CanvasEle
     ...element.style, // Spread AI-provided styles first
   };
 
-  // Apply specific, potentially controlled styles
+  // Apply specific, potentially controlled styles from editor or defaults
   if (element.style?.fontFamily) style.fontFamily = element.style.fontFamily as string;
   if (element.style?.fontSize) style.fontSize = `${parseFloat(element.style.fontSize as string) * scale}px`; // Scale font size
   if (element.style?.color) style.color = element.style.color as string;
   if (element.style?.backgroundColor) style.backgroundColor = element.style.backgroundColor as string;
   
-  // Text-specific styles from editor
+  // Text-specific styles
   if (element.style?.fontWeight) style.fontWeight = element.style.fontWeight;
   if (element.style?.letterSpacing) style.letterSpacing = element.style.letterSpacing;
   if (element.style?.lineHeight) style.lineHeight = element.style.lineHeight;
   if (element.style?.textAlign) style.textAlign = element.style.textAlign;
   if (element.style?.textShadow) style.textShadow = element.style.textShadow;
 
-  // Generic styles from editor
+  // Generic styles
   if (element.style?.zIndex) style.zIndex = Number(element.style.zIndex);
   if (element.style?.rotation) {
     style.transform = `${style.transform || ''} rotate(${element.style.rotation}deg)`;
   }
+  if (typeof element.style?.opacity === 'number') style.opacity = element.style.opacity;
+  if (element.style?.borderRadius) style.borderRadius = element.style.borderRadius as string;
   
 
   const handleElementClick = (e: React.MouseEvent) => {
@@ -58,16 +60,18 @@ export function CanvasElement({ element, scale, isSelected, onClick }: CanvasEle
         </div>
       );
     case 'image':
+      // Ensure data-ai-hint is correctly accessed from element.style
+      const aiHint = element.style?.['data-ai-hint'] as string || "graphic element";
       return (
         <div style={style} onClick={handleElementClick} className="overflow-hidden">
           <Image
             src={element.source && element.source !== "https://example.com/image.jpg" ? element.source : `https://placehold.co/${Math.round(element.size.width)}x${Math.round(element.size.height)}.png`}
             alt={element.content || 'Design image'}
-            width={Math.max(1, element.size.width * scale)} // Ensure width/height are at least 1
+            width={Math.max(1, element.size.width * scale)} 
             height={Math.max(1, element.size.height * scale)}
             className="object-cover w-full h-full"
-            data-ai-hint="graphic design"
-            unoptimized={element.source?.startsWith('data:image/')} // Prevent optimization for data URIs
+            data-ai-hint={aiHint}
+            unoptimized={element.source?.startsWith('data:')} 
           />
         </div>
       );

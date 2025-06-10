@@ -1,17 +1,19 @@
+
 'use client';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AiDesignTool } from '@/components/tools/AiDesignTool';
 import { TemplateLibrary } from '@/components/tools/TemplateLibrary';
 import { ElementLibrary } from '@/components/tools/ElementLibrary';
-import type { DesignLayout } from '@/types/blueprint';
+import type { DesignLayout, DesignElement } from '@/types/blueprint';
 import { Wand2, LayoutDashboard, Puzzle } from 'lucide-react';
 
 interface LeftPanelProps {
   onLayoutSelect: (layout: DesignLayout) => void;
+  onAddElement: (elementSchema: Omit<DesignElement, 'id'>) => void;
 }
 
-export function LeftPanel({ onLayoutSelect }: LeftPanelProps) {
+export function LeftPanel({ onLayoutSelect, onAddElement }: LeftPanelProps) {
   return (
     <aside className="w-[350px] border-r bg-card flex flex-col h-full">
       <Tabs defaultValue="ai-tool" className="flex flex-col flex-grow">
@@ -30,10 +32,10 @@ export function LeftPanel({ onLayoutSelect }: LeftPanelProps) {
           <AiDesignTool onLayoutSelect={onLayoutSelect} />
         </TabsContent>
         <TabsContent value="templates" className="flex-grow mt-0 overflow-y-auto">
-          <TemplateLibrary />
+          <TemplateLibrary onLayoutSelect={onLayoutSelect} />
         </TabsContent>
         <TabsContent value="elements" className="flex-grow mt-0 overflow-y-auto">
-          <ElementLibrary />
+          <ElementLibrary onAddElement={onAddElement} />
         </TabsContent>
       </Tabs>
     </aside>
