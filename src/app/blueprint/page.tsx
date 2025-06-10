@@ -7,27 +7,7 @@ import { LeftPanel } from '@/components/layout/LeftPanel';
 import { CenterPanel } from '@/components/layout/CenterPanel';
 import { RightPanel } from '@/components/layout/RightPanel';
 import type { DesignLayout, DesignElement } from '@/types/blueprint';
-import type { Metadata } from 'next';
-
-// Note: 'export const metadata' only works in Server Components.
-// For client components, metadata should be handled in a parent layout or page.
-// However, Next.js might pick this up if this file is treated as a route entry point.
-// For robust metadata, ensure it's in a server component (e.g., layout.tsx for this route).
-// Since this is the main page for /blueprint, we can define it here.
-// However, for client components, it's better to set dynamic titles via `document.title` or a context.
-// For static metadata, it's typically defined in a `layout.tsx` or a server `page.tsx`.
-// For now, we'll keep it simple as if it were a server component for metadata purposes.
-
-// This is a workaround for Client Component metadata.
-// Ideally, this page would be a Server Component if static metadata is primary.
-// Or, metadata would be in a `src/app/blueprint/layout.tsx`.
-export function generateMetadata(): Metadata {
-  return {
-    title: 'Blueprint Editor | AI Design Tool',
-    description: 'Create and edit your designs using the Blueprint AI-powered editor.',
-  };
-}
-
+// Removed Metadata import as it's handled in layout.tsx
 
 export default function BlueprintEditorPage() {
   const [currentDesign, setCurrentDesign] = useState<DesignLayout | null>(null);
