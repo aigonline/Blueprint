@@ -37,7 +37,6 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
   }, []);
   
   const handleCanvasClick = (e: React.MouseEvent) => {
-    // Only deselect if clicking directly on the canvas, not an element
     if (e.target === e.currentTarget) {
       onSelectElement(null);
     }
@@ -46,14 +45,14 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
   const canvasStyle: React.CSSProperties = {
     width: `${canvasSize.width}px`,
     height: `${canvasSize.height}px`,
-    position: 'relative', // Keep relative for absolute positioning of children
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)', // from shadow-lg
+    position: 'relative', 
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)', 
   };
 
   if (design?.canvasBackgroundColor) {
     canvasStyle.backgroundColor = design.canvasBackgroundColor;
   } else {
-    canvasStyle.backgroundColor = 'hsl(var(--card))'; // Default from bg-card
+    canvasStyle.backgroundColor = 'hsl(var(--card))'; 
   }
 
 
@@ -73,7 +72,7 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
             scale={scale}
             isSelected={element.id === selectedElementId}
             onClick={(e) => {
-              e.stopPropagation(); // Prevent canvas click when element is clicked
+              e.stopPropagation(); 
               onSelectElement(element.id);
             }}
           />
@@ -81,6 +80,11 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
         {!design && (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
             <p>No design loaded. Use the AI tool or templates to start.</p>
+          </div>
+        )}
+        {design && design.elements.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+            <p>Canvas is blank. Add elements or use AI to generate a design.</p>
           </div>
         )}
       </div>
@@ -93,7 +97,7 @@ export function addIdsToLayout(layout: Omit<DesignLayout, 'id' | 'elements' | 'c
     ...layout,
     id: crypto.randomUUID(),
     elements: layout.elements.map(el => ({ ...el, id: crypto.randomUUID() })),
-    canvasBackgroundColor: layout.canvasBackgroundColor || 'hsl(var(--card))', // Default background
+    canvasBackgroundColor: layout.canvasBackgroundColor || 'hsl(var(--card))', 
   };
 }
 
