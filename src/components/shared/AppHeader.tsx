@@ -1,16 +1,22 @@
 
-import { Download, Zap } from 'lucide-react';
+'use client'; // Add 'use client' because we use hooks like useAuth, useToast
+
+import { Download, Zap, LogOut, User, LogIn, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import type { DesignLayout } from '@/types/blueprint'; // Added
-import { useToast } from '@/hooks/use-toast'; // Added
+import type { DesignLayout } from '@/types/blueprint';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext'; // Import useAuth
+import { useRouter } from 'next/navigation'; // Import for redirecting
 
 interface AppHeaderProps {
-  currentDesign?: DesignLayout | null; // Made optional for landing page
+  currentDesign?: DesignLayout | null;
 }
 
 export function AppHeader({ currentDesign }: AppHeaderProps) {
   const { toast } = useToast();
+  const { user, logout, loading } = useAuth(); // Get user and logout from AuthContext
+  const router = useRouter();
 
   const handleDownload = () => {
     if (!currentDesign) {
@@ -47,6 +53,16 @@ export function AppHeader({ currentDesign }: AppHeaderProps) {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
+      router.push('/'); // Redirect to home page after logout
+    } catch (error) {
+      toast({ title: 'Logout Failed', description: 'Could not log out. Please try again.', variant: 'destructive' });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -54,12 +70,42 @@ export function AppHeader({ currentDesign }: AppHeaderProps) {
           <Zap className="h-7 w-7 text-primary" />
           <h1 className="text-2xl font-bold font-headline text-primary">Blueprint</h1>
         </Link>
-        {currentDesign !== undefined && ( // Only show download if on blueprint page (where currentDesign is passed)
-          <Button variant="outline" onClick={handleDownload}>
-            <Download className="mr-2 h-4 w-4" />
-            Download JSON
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {currentDesign !== undefined && (
+            <Button variant="outline" onClick={handleDownload} size="sm">
+              <Download className="mr-2 h-4 w-4" />
+              Download JSON
+            </Button>
+          )}
+          {!loading && user ? (
+            <>
+              <span className="text-sm text-muted-foreground hidden sm:inline">
+                {user.email}
+              </span>
+              <Button variant="ghost" onClick={handleLogout} size="sm">
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </>
+          ) : !loading ? (
+            <>
+              <Button variant="ghost" asChild size="sm">
+                <Link href="/login">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </Link>
+              </Button>
+              <Button variant="default" asChild size="sm">
+                <Link href="/signup">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Sign Up
+                </Link>
+              </Button>
+            </>
+          ) : (
+             <div className="h-8 w-20 animate-pulse bg-muted rounded-md"></div> // Simple loader
+          )}
+        </div>
       </div>
     </header>
   );

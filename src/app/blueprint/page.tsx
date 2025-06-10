@@ -1,17 +1,30 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Added useEffect
+import { useRouter } from 'next/navigation'; // Added useRouter
 import { AppHeader } from '@/components/shared/AppHeader';
 import { LeftPanel } from '@/components/layout/LeftPanel';
 import { CenterPanel } from '@/components/layout/CenterPanel';
 import { RightPanel } from '@/components/layout/RightPanel';
 import type { DesignLayout, DesignElement } from '@/types/blueprint';
 import { addIdsToElements } from '@/components/canvas/Canvas';
+import { useAuth } from '@/context/AuthContext'; // Added useAuth
+import { Loader2 } from 'lucide-react'; // Added Loader2
 
 export default function BlueprintEditorPage() {
+  const { user, loading: authLoading } = useAuth(); // Get user and auth loading state
+  const router = useRouter(); // Initialize router
   const [currentDesign, setCurrentDesign] = useState<DesignLayout | null>(null);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Redirect to login if not authenticated and not loading
+    if (!authLoading && !user) {
+      router.push('/login?redirect=/blueprint');
+    }
+  }, [user, authLoading, router]);
+
 
   const handleLayoutSelect = (layout: DesignLayout | null) => {
     setCurrentDesign(layout);
@@ -43,7 +56,6 @@ export default function BlueprintEditorPage() {
     const [newElementWithId] = addIdsToElements([newElementSchema]);
     setCurrentDesign(prevDesign => {
       if (!prevDesign) {
-        // If there's no current design, create one with this new element
         return {
           id: crypto.randomUUID(),
           description: 'New Design with Element',
@@ -51,7 +63,6 @@ export default function BlueprintEditorPage() {
           canvasBackgroundColor: 'hsl(var(--card))',
         };
       }
-      // Add to existing design
       return {
         ...prevDesign,
         elements: [...prevDesign.elements, newElementWithId],
@@ -68,6 +79,16 @@ export default function BlueprintEditorPage() {
       };
     });
   };
+  
+  // Show a loading spinner while checking auth or if user is not yet available
+  if (authLoading || !user) {
+    return (
+      <div className="flex flex-col h-screen max-h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading editor...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-hidden">
