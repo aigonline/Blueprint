@@ -57,10 +57,10 @@ const DesignLayoutSchema = z.object({
         .describe('The position of the element.'),
       size: z
         .object({
-          width: z.number().positive("Width must be a positive number.").describe('The width of the element, must be greater than 0.'),
-          height: z.number().positive("Height must be a positive number.").describe('The height of the element, must be greater than 0.'),
+          width: z.number().gt(0, "Width must be greater than 0.").describe('The width of the element, must be greater than 0.'),
+          height: z.number().gt(0, "Height must be greater than 0.").describe('The height of the element, must be greater than 0.'),
         })
-        .describe('The size of the element. Both width and height must be positive values.'),
+        .describe('The size of the element. Both width and height must be positive values (>0).'),
       content: z.string().optional().describe('The content of the element (e.g., text).'),
       source: z.string().optional().describe('The source URL of the element (e.g., image).'),
       style: ElementStyleSchema,
@@ -90,7 +90,7 @@ const prompt = ai.definePrompt({
 User Prompt: {{{prompt}}}
 
 Return three different design layout options in the layouts array. Each layout must follow the DesignLayout schema. Each layout should contain at least 3 elements.
-All elements must have positive width and height.
+All elements must have a width and height greater than 0.
 All elements should be positioned within a 1000x1000 bounding box.
 For the 'style' property of elements: if you include the 'style' object, it must not be empty. It should contain specific CSS properties. If no styles are needed for an element, omit the 'style' property entirely.
 For 'canvasBackgroundColor', you can suggest a suitable background color for the entire design, or omit it to use a default.
