@@ -7,7 +7,6 @@ import { LeftPanel } from '@/components/layout/LeftPanel';
 import { CenterPanel } from '@/components/layout/CenterPanel';
 import { RightPanel } from '@/components/layout/RightPanel';
 import type { DesignLayout, DesignElement } from '@/types/blueprint';
-// Removed Metadata import as it's handled in layout.tsx
 
 export default function BlueprintEditorPage() {
   const [currentDesign, setCurrentDesign] = useState<DesignLayout | null>(null);
@@ -15,7 +14,7 @@ export default function BlueprintEditorPage() {
 
   const handleLayoutSelect = (layout: DesignLayout | null) => {
     setCurrentDesign(layout);
-    setSelectedElementId(null); // Deselect any element when a new layout is chosen
+    setSelectedElementId(null); 
   };
 
   const handleSelectElement = (elementId: string | null) => {
@@ -39,10 +38,20 @@ export default function BlueprintEditorPage() {
     });
   };
 
+  const handleUpdateCanvasBackgroundColor = (color: string) => {
+    setCurrentDesign(prevDesign => {
+      if (!prevDesign) return { id: crypto.randomUUID(), description: 'New Design', elements: [], canvasBackgroundColor: color };
+      return {
+        ...prevDesign,
+        canvasBackgroundColor: color,
+      };
+    });
+  };
+
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-hidden">
       <AppHeader />
-      <div className="flex flex-1 min-h-0"> {/* min-h-0 is crucial for flex children to scroll correctly */}
+      <div className="flex flex-1 min-h-0">
         <LeftPanel onLayoutSelect={handleLayoutSelect} />
         <CenterPanel 
           currentDesign={currentDesign} 
@@ -52,6 +61,8 @@ export default function BlueprintEditorPage() {
         <RightPanel 
           selectedElement={getSelectedElement()}
           onUpdateElement={handleUpdateElement}
+          canvasBackgroundColor={currentDesign?.canvasBackgroundColor}
+          onUpdateCanvasBackgroundColor={handleUpdateCanvasBackgroundColor}
         />
       </div>
     </div>

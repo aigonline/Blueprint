@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { DesignElement } from '@/types/blueprint';
@@ -5,22 +6,38 @@ import { TextEditor } from './TextEditor';
 import { ImageEditor } from './ImageEditor';
 import { ShapeEditor } from './ShapeEditor';
 import { GenericElementEditor } from './GenericElementEditor';
+import { CanvasPropertiesEditor } from './CanvasPropertiesEditor'; // New Import
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Settings2 } from 'lucide-react';
+import { Settings2, SquareAsterisk } from 'lucide-react'; // Added SquareAsterisk for Canvas
 
 interface PropertiesEditorProps {
   selectedElement: DesignElement | null;
   onUpdateElement: (updatedElement: DesignElement) => void;
+  canvasBackgroundColor?: string;
+  onUpdateCanvasBackgroundColor: (color: string) => void;
 }
 
-export function PropertiesEditor({ selectedElement, onUpdateElement }: PropertiesEditorProps) {
+export function PropertiesEditor({ 
+  selectedElement, 
+  onUpdateElement,
+  canvasBackgroundColor,
+  onUpdateCanvasBackgroundColor
+}: PropertiesEditorProps) {
   if (!selectedElement) {
     return (
-      <div className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground">
-        <Settings2 className="w-12 h-12 mb-4" />
-        <h3 className="text-lg font-semibold font-headline">Properties</h3>
-        <p className="text-sm mt-1">Select an element on the canvas to edit its properties.</p>
-      </div>
+      <ScrollArea className="h-full">
+        <div className="p-4">
+          <div className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground mb-4">
+            <Settings2 className="w-12 h-12 mb-4" />
+            <h3 className="text-lg font-semibold font-headline">Properties</h3>
+            <p className="text-sm mt-1">Select an element on the canvas to edit its properties.</p>
+          </div>
+          <CanvasPropertiesEditor 
+            backgroundColor={canvasBackgroundColor} 
+            onUpdateBackgroundColor={onUpdateCanvasBackgroundColor} 
+          />
+        </div>
+      </ScrollArea>
     );
   }
 

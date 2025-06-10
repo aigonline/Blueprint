@@ -1,9 +1,10 @@
+
 'use client';
 
 import type { DesignLayout, DesignElement } from '@/types/blueprint';
 import { CanvasElement } from './CanvasElement';
 import React, { useRef, useEffect, useState } from 'react';
-import { cn } from '@/lib/utils'; // Added import
+import { cn } from '@/lib/utils';
 
 interface CanvasProps {
   design: DesignLayout | null;
@@ -24,7 +25,6 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
     const calculateScale = () => {
       if (canvasContainerRef.current) {
         const containerWidth = canvasContainerRef.current.offsetWidth;
-        // Maintain aspect ratio for a square canvas, fitting into available width
         const newScale = containerWidth / CANVAS_BASE_WIDTH;
         setScale(newScale);
         setCanvasSize({ width: CANVAS_BASE_WIDTH * newScale, height: CANVAS_BASE_HEIGHT * newScale });
@@ -36,18 +36,34 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
     return () => window.removeEventListener('resize', calculateScale);
   }, []);
   
-  const handleCanvasClick = () => {
-    onSelectElement(null); // Deselect element when clicking on canvas background
+  const handleCanvasClick = (e: React.MouseEvent) => {
+    // Only deselect if clicking directly on the canvas, not an element
+    if (e.target === e.currentTarget) {
+      onSelectElement(null);
+    }
   };
 
+  const canvasStyle: React.CSSProperties = {
+    width: `${canvasSize.width}px`,
+    height: `${canvasSize.height}px`,
+    position: 'relative', // Keep relative for absolute positioning of children
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)', // from shadow-lg
+  };
+
+  if (design?.canvasBackgroundColor) {
+    canvasStyle.backgroundColor = design.canvasBackgroundColor;
+  } else {
+    canvasStyle.backgroundColor = 'hsl(var(--card))'; // Default from bg-card
+  }
+
+
   return (
-    <div ref={canvasContainerRef} className={cn("w-full h-full flex items-center justify-center bg-muted/50 p-4 overflow-hidden", className)}>
+    <div 
+      ref={canvasContainerRef} 
+      className={cn("w-full h-full flex items-center justify-center bg-muted/50 p-4 overflow-hidden", className)}
+    >
       <div
-        className="relative bg-card shadow-lg"
-        style={{
-          width: `${canvasSize.width}px`,
-          height: `${canvasSize.height}px`,
-        }}
+        style={canvasStyle}
         onClick={handleCanvasClick}
       >
         {design && design.elements.map((element) => (
@@ -56,7 +72,10 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
             element={element}
             scale={scale}
             isSelected={element.id === selectedElementId}
-            onClick={() => onSelectElement(element.id)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent canvas click when element is clicked
+              onSelectElement(element.id);
+            }}
           />
         ))}
         {!design && (
@@ -69,12 +88,12 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
   );
 }
 
-// Helper to generate unique IDs, to be used when processing AI response
-export function addIdsToLayout(layout: Omit<DesignLayout, 'id' | 'elements'> & { elements: Omit<DesignElement, 'id'>[] }): DesignLayout {
+export function addIdsToLayout(layout: Omit<DesignLayout, 'id' | 'elements' | 'canvasBackgroundColor'> & { elements: Omit<DesignElement, 'id'>[] }): DesignLayout {
   return {
     ...layout,
     id: crypto.randomUUID(),
     elements: layout.elements.map(el => ({ ...el, id: crypto.randomUUID() })),
+    canvasBackgroundColor: layout.canvasBackgroundColor || 'hsl(var(--card))', // Default background
   };
 }
 

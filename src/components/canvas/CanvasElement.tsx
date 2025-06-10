@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { DesignElement } from '@/types/blueprint';
@@ -7,7 +8,7 @@ interface CanvasElementProps {
   element: DesignElement;
   scale: number;
   isSelected: boolean;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent) => void; // Pass event for stopPropagation
 }
 
 export function CanvasElement({ element, scale, isSelected, onClick }: CanvasElementProps) {
@@ -19,20 +20,34 @@ export function CanvasElement({ element, scale, isSelected, onClick }: CanvasEle
     height: `${element.size.height * scale}px`,
     boxSizing: 'border-box',
     border: isSelected ? '2px solid hsl(var(--accent))' : '1px dashed hsl(var(--border))',
-    transition: 'border 0.2s ease-in-out',
-    ...element.style, // Spread AI-provided styles
+    transition: 'border 0.2s ease-in-out, transform 0.2s ease-in-out',
+    cursor: 'pointer',
+    ...element.style, // Spread AI-provided styles first
   };
 
-  // Ensure specific styles from AI are applied correctly
+  // Apply specific, potentially controlled styles
   if (element.style?.fontFamily) style.fontFamily = element.style.fontFamily as string;
   if (element.style?.fontSize) style.fontSize = `${parseFloat(element.style.fontSize as string) * scale}px`; // Scale font size
   if (element.style?.color) style.color = element.style.color as string;
   if (element.style?.backgroundColor) style.backgroundColor = element.style.backgroundColor as string;
-  if (element.style?.textAlign) style.textAlign = element.style.textAlign as React.CSSProperties['textAlign'];
+  
+  // Text-specific styles from editor
+  if (element.style?.fontWeight) style.fontWeight = element.style.fontWeight;
+  if (element.style?.letterSpacing) style.letterSpacing = element.style.letterSpacing;
+  if (element.style?.lineHeight) style.lineHeight = element.style.lineHeight;
+  if (element.style?.textAlign) style.textAlign = element.style.textAlign;
+  if (element.style?.textShadow) style.textShadow = element.style.textShadow;
+
+  // Generic styles from editor
+  if (element.style?.zIndex) style.zIndex = Number(element.style.zIndex);
+  if (element.style?.rotation) {
+    style.transform = `${style.transform || ''} rotate(${element.style.rotation}deg)`;
+  }
+  
 
   const handleElementClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent click from bubbling to canvas if elements overlap
-    onClick();
+    e.stopPropagation(); 
+    onClick(e);
   };
 
   switch (element.type) {
@@ -48,10 +63,11 @@ export function CanvasElement({ element, scale, isSelected, onClick }: CanvasEle
           <Image
             src={element.source && element.source !== "https://example.com/image.jpg" ? element.source : `https://placehold.co/${Math.round(element.size.width)}x${Math.round(element.size.height)}.png`}
             alt={element.content || 'Design image'}
-            width={element.size.width * scale}
-            height={element.size.height * scale}
+            width={Math.max(1, element.size.width * scale)} // Ensure width/height are at least 1
+            height={Math.max(1, element.size.height * scale)}
             className="object-cover w-full h-full"
             data-ai-hint="graphic design"
+            unoptimized={element.source?.startsWith('data:image/')} // Prevent optimization for data URIs
           />
         </div>
       );

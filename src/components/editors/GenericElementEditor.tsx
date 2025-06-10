@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { DesignElement } from '@/types/blueprint';
@@ -32,9 +33,20 @@ export function GenericElementEditor({ element, onUpdateElement }: GenericElemen
     });
   };
 
+  const handleStyleChange = (property: keyof DesignElement['style'], value: string | number) => {
+    onUpdateElement({
+      ...element,
+      style: {
+        ...element.style,
+        [property]: value,
+      },
+    });
+  };
+
+
   return (
     <div className="space-y-4 border-t border-border pt-4 mt-4">
-       <h4 className="text-sm font-medium text-muted-foreground font-headline">Transform</h4>
+       <h4 className="text-sm font-medium text-muted-foreground font-headline">Transform & Layout</h4>
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label htmlFor={`element-pos-x-${element.id}`} className="text-xs">X</Label>
@@ -75,6 +87,28 @@ export function GenericElementEditor({ element, onUpdateElement }: GenericElemen
             type="number"
             value={element.size.height}
             onChange={(e) => handleSizeChange('height', e.target.value)}
+            className="mt-1 h-8"
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label htmlFor={`element-rotation-${element.id}`} className="text-xs">Rotation (°)</Label>
+          <Input
+            id={`element-rotation-${element.id}`}
+            type="number"
+            value={element.style?.rotation || 0}
+            onChange={(e) => handleStyleChange('rotation', parseFloat(e.target.value) || 0)}
+            className="mt-1 h-8"
+          />
+        </div>
+        <div>
+          <Label htmlFor={`element-zindex-${element.id}`} className="text-xs">Z-Index</Label>
+          <Input
+            id={`element-zindex-${element.id}`}
+            type="number"
+            value={element.style?.zIndex || 0}
+            onChange={(e) => handleStyleChange('zIndex', parseInt(e.target.value) || 0)}
             className="mt-1 h-8"
           />
         </div>
