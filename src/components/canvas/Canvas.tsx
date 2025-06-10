@@ -25,9 +25,12 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
     const calculateScale = () => {
       if (canvasContainerRef.current) {
         const containerWidth = canvasContainerRef.current.offsetWidth;
-        const newScale = containerWidth / CANVAS_BASE_WIDTH;
-        setScale(newScale);
-        setCanvasSize({ width: CANVAS_BASE_WIDTH * newScale, height: CANVAS_BASE_HEIGHT * newScale });
+        if (containerWidth > 0) { // Only calculate and set scale if container width is positive
+          const newScale = containerWidth / CANVAS_BASE_WIDTH;
+          setScale(newScale);
+          setCanvasSize({ width: CANVAS_BASE_WIDTH * newScale, height: CANVAS_BASE_HEIGHT * newScale });
+        }
+        // If containerWidth is 0, do nothing, preserving the previous scale or initial scale (1)
       }
     };
 
@@ -37,6 +40,7 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
   }, []);
   
   const handleCanvasClick = (e: React.MouseEvent) => {
+    // Deselect element if the click is directly on the canvas background, not an element
     if (e.target === e.currentTarget) {
       onSelectElement(null);
     }
@@ -52,6 +56,7 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
   if (design?.canvasBackgroundColor) {
     canvasStyle.backgroundColor = design.canvasBackgroundColor;
   } else {
+    // Fallback to a theme color if not specified or if design is null
     canvasStyle.backgroundColor = 'hsl(var(--card))'; 
   }
 
@@ -71,8 +76,8 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
             element={element}
             scale={scale}
             isSelected={element.id === selectedElementId}
-            onClick={(e) => {
-              e.stopPropagation(); 
+            onClick={(e) => { // Click on an element to select it
+              e.stopPropagation(); // Prevent canvas click from firing
               onSelectElement(element.id);
             }}
           />
@@ -92,15 +97,18 @@ export function Canvas({ design, selectedElementId, onSelectElement, className }
   );
 }
 
-export function addIdsToLayout(layout: Omit<DesignLayout, 'id' | 'elements' | 'canvasBackgroundColor'> & { elements: Omit<DesignElement, 'id'>[] }): DesignLayout {
+// Helper function to add unique IDs to layouts and their elements received from AI
+export function addIdsToLayout(layout: Omit<DesignLayout, 'id' | 'elements' | 'canvasBackgroundColor'> & { elements: Omit<DesignElement, 'id'>[], canvasBackgroundColor?: string }): DesignLayout {
   return {
     ...layout,
     id: crypto.randomUUID(),
     elements: layout.elements.map(el => ({ ...el, id: crypto.randomUUID() })),
-    canvasBackgroundColor: layout.canvasBackgroundColor || 'hsl(var(--card))', 
+    canvasBackgroundColor: layout.canvasBackgroundColor || 'hsl(var(--card))', // Ensure this is set
   };
 }
 
+// Helper function to add unique IDs to a list of elements (e.g., when adding from an element library)
 export function addIdsToElements(elements: Omit<DesignElement, 'id'>[]): DesignElement[] {
   return elements.map(el => ({ ...el, id: crypto.randomUUID() }));
 }
+
